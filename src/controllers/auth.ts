@@ -65,9 +65,11 @@ export const login = async (req: Request, res: Response) => {
 
   const token = jwt.sign(user.email, JWT_SECRET!);
 
-  res.status(200).json({ user, token });
+  res
+    .status(200)
+    .json({ user: { id: user.id, name: user.name, email: user.email }, token });
 };
 
-export const protectedRoute = async (req: Request, res: Response) => {
-  res.status(200).json({ message: "Welcome to the protected route" });
+export const verifyToken = async (req: Request, res: Response) => {
+  res.status(200).json(req.user);
 };

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { UnauthorizedException } from "../exceptions/uanauthorized";
 import * as jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../secrets";
+import { prismaClient } from "../server";
 
 export const authMiddleware = async (
   req: Request,
@@ -17,13 +18,21 @@ export const authMiddleware = async (
 
     const tokenWithoutBearer = token.split(" ")[1];
 
-    const verifyToken = jwt.verify(tokenWithoutBearer, JWT_SECRET!);
+    const payload = jwt.verify(tokenWithoutBearer, JWT_SECRET!);
 
-    if (verifyToken) {
-      next();
-    } else {
-      throw new Error();
-    }
+    if (!payload) throw new Error();
+
+    const user = await prismaClient.user.findFirst({
+      where: {
+        email: payload.toString(),
+      },
+    });
+
+    if (!user) throw new Error();
+
+    req.user = user;
+
+    next();
   } catch (err) {
     next(new UnauthorizedException("Unauthorized user"));
   }
