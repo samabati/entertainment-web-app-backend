@@ -27,7 +27,6 @@ export const signUp = async (req: Request, res: Response) => {
 
   const user = await prismaClient.user.create({
     data: {
-      name: req.body.name,
       email: req.body.email,
       password: hashPw,
     },
@@ -65,9 +64,7 @@ export const login = async (req: Request, res: Response) => {
 
   const token = jwt.sign(user.email, JWT_SECRET!);
 
-  res
-    .status(200)
-    .json({ user: { id: user.id, name: user.name, email: user.email }, token });
+  res.status(200).json({ user: { id: user.id, email: user.email }, token });
 };
 
 export const verifyToken = async (req: Request, res: Response) => {
